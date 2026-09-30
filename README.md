@@ -1,7 +1,7 @@
 # Capstone
 Code-To-Flowchart Repository 
 
-#TEAM MEMBERS
+# TEAM MEMBERS
 Lucas Castillo
 Manuel Cruz
 Rex Day
