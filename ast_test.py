@@ -19,6 +19,10 @@ def main():
         sys.exit(1)
  
     print(ast.dump(tree, indent=1))
+
+    with open("output.txt", 'w', encoding="utf-8") as filew:
+        filew.write(ast.dump(tree,indent=1))
+
  
  
 if __name__ == "__main__":
