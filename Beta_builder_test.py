@@ -141,7 +141,7 @@ class GraphBuilder: #starts creation of nodes and edges
         return [] #does not have an exit since it leaves the function, so returns empty list
 
     def simple_statement(self, stmt, exits):
-        n = self.new("simple", ast.unparse(stmt), exits) #new node with the statement as the label, this is for unhandled statements
+        n = self.new("simple", "EDGE CASE" + ast.unparse(stmt), exits) #new node with the statement as the label, this is for unhandled statements
         return [(n, "")] #the node is an exit, so returns it as a list with an empty label
 
 

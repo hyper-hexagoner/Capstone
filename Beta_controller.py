@@ -3,11 +3,12 @@ from Beta_builder_test import getnode
 from ast_test import main
 from renderer_test import Render
 
+Shapes = {"if": "rectangle"}
 
 def write_instructions(nodes, edges): #instead of builder writing to DotInstructions, controller will with the nodes and edges from getNode() from builder
     with open("DotInstructions.py", 'w', encoding="utf-8") as instructions:
         for n in nodes:
-            print(f"dot.node({n.id!r}, graphviz.escape({n.label!r}))", file=instructions)
+            print(f"dot.node({n.id!r}, graphviz.escape({n.label!r}), shape={Shapes.get(n.kind)!r})", file=instructions)
         for e in edges: #dot.node is adding the node and id, along with label, !r is used to get it via string. file is so that a print statement won't print to terminal
             if e.label:
                 print(f"dot.edge({e.source!r}, {e.target!r}, label={e.label!r})", file = instructions)
