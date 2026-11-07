@@ -32,11 +32,10 @@ def to_ast(expr): #turns the text back into an AST node
     if isinstance(expr, ast.Name) and expr.id == "Ellipsis": #if the expr is ellipsis then returns ellipsis, might have to make more of these as we add tests
         return ...
     return ast.literal_eval(expr)#returns literals, such as integers, floats, etc
+
 class GraphBuilder: #starts creation of nodes and edges
 
     def build(self, tree):
- 
-      
         self.nodes = []
         self.edges = []
         self.functions = []
@@ -110,20 +109,25 @@ class GraphBuilder: #starts creation of nodes and edges
         return self.block(stmt.body, [(n, "true")]) + self.block(stmt.orelse, [(n, "false")]) #returns both exits for true and false so if will connect to both.
  
     def while_statement(self, stmt, exits): 
-        return self.loop(stmt, "while " + ast.unparse(stmt.test), "true", "false", exits) #ex while , unparses test, true enters loop, false exits
+        return self.loop(stmt, "while " + ast.unparse(stmt.test), "true", "false", exits, "w") #ex while , unparses test, true enters loop, false exits
  
     def for_statement(self, stmt, exits):
         label = f"for {ast.unparse(stmt.target)} in {ast.unparse(stmt.iter)}" #for target in iteration, 
-        return self.loop(stmt, label, "next", "done", exits) #returns next to go back into loop, done to exit loop, exits is the list of nodes that need to be connected to the for loop
+        return self.loop(stmt, label, "next", "done", exits, "f") #returns next to go back into loop, done to exit loop, exits is the list of nodes that need to be connected to the for loop
 
-    def loop(self, stmt, label, into, out, exits): #broader for and while loop, both of those call this
-        header = self.new("loop", label, exits) #main loop node
+    def loop(self, stmt, label, into, out, exits, fromw):
+        if (fromw == "f"):
+            header = self.new("for", label, exits) #changes kind to for
+        elif(fromw == "w"):
+            header = self.new("while", label, exits) #changes kind to while
+        else:
+            header = self.new("loop", label, exits) #defaults kind to loop 
         breaks = [] #list of breaks
-        self.loops.append((header, breaks)) #adds loop to stack incase we nest
-        body_exits = self.block(stmt.body, [(header, into)]) #processes loop
-        self.loops.pop() #removes loop from stack
-        self.connect_all(body_exits, header) #connects exits from loop to the start loop node
-        return self.block(stmt.orelse, [(header, out)]) + breaks #if there is an else block, combines exits with break exits
+        self.loops.append((header, breaks)) #adds loop to stack for nests
+        body_exits = self.block(stmt.body, [(header, into)]) #process loop
+        self.loops.pop() #pops loop from nest stack
+        self.connect_all(body_exits, header) # connects exit from loop to start loop node
+        return self.block(stmt.orelse, [(header, out)]) + breaks #if there is an else block it will combine exits
 
     def try_statement(self, stmt, exits):
         n = self.new("try", "try", exits) #new try node
