@@ -2,9 +2,13 @@
 #PLAN: GO LINE BY LINE TO SEND EACH SEGMENT OF CODE IN THROUGH TO THE CONTROLLER
 #INITIAL PLAN: GET FIRST LINE OF AST TO SET AT OPENING NODE
 
+#Lucas's planned additions:
+#1. Allow nodes to be different shapes, especially function calls (COMPLETE)
+
+#Update all functions related to nodes to be able to call on a 
 import ast
 from collections import namedtuple
-
+counter = 0 #int to determine if this is the beginning of the file or a different function
 
 Node = namedtuple("Node", "id kind label")
 Edge = namedtuple("Edge", "source target label") 
@@ -28,11 +32,11 @@ def to_ast(expr): #turns the text back into an AST node
     if isinstance(expr, ast.Name) and expr.id == "Ellipsis": #if the expr is ellipsis then returns ellipsis, might have to make more of these as we add tests
         return ...
     return ast.literal_eval(expr)#returns literals, such as integers, floats, etc
-
-        
-
 class GraphBuilder: #starts creation of nodes and edges
+
     def build(self, tree):
+ 
+      
         self.nodes = []
         self.edges = []
         self.functions = []
@@ -40,15 +44,24 @@ class GraphBuilder: #starts creation of nodes and edges
         for func in self.functions: #seperates functions into their own flowcharts, potentially useful for json? just figured that they should be seperate flowchart either way with the expansion requirement
             self.add_flow(func.name, func.body)
         return self.nodes, self.edges #returns nodes and edges to caller
-
     def add_flow(self, name, body): #flowchart creation
-        start = self.new("start", "Start: " + name, []) #start node, empty list is connections
-        self.end = self.new("end", "End", []) #end node 
-        self.loops = [] #stack of the loops we encounter
-        exits = self.block(body, [(start, "")]) #exits is all of the nodes that need to have edges connected
+        global counter #ensure  counter can be used here
+        if counter == 0: #should be true on first flowchart
+            counter = counter+1 #make flag no longer 0
+            start = self.new("start", "Start: " + name, []) #start node, empty list is connections
+
+            self.end = self.new("end", "End", []) #end node 
+            self.loops = [] #stack of the loops we encounter
+            exits = self.block(body, [(start, "")]) #exits is all of the nodes that need to have edges connected
+        else: 
+          #print("NEW FUNCTION FOUND") #debug text
+          start = self.new("funcstart", "Start: " + name, []) #start of function node, empty list is connections , new kind is funcstart
+          self.end = self.new("funcend", "End", []) #end node 
+          self.loops = [] #stack of the loops we encounter
+          exits = self.block(body, [(start, "")]) #exits is all of the nodes that need to have edges connected            
         self.connect_all(exits, self.end) #connects exit nodes to the final end node
 
-    def add_node(self, kind, label):
+    def add_node(self, kind, label): 
         node_id = f"n{len(self.nodes)}" #ids are n0, n1 etc
         self.nodes.append(Node(node_id, kind, label.splitlines()[0])) #only one line of label, removed 40 char limit, could reimplement with [:x] current test cases go over 40 chars
         return node_id #returns node num
@@ -74,8 +87,8 @@ class GraphBuilder: #starts creation of nodes and edges
         if isinstance(stmt, ast.FunctionDef):
             self.functions.append(stmt)          
             return exits
-        if isinstance(stmt, ast.If):
-            return self.if_statement(stmt, exits)
+        if isinstance(stmt, ast.If): ##if statement found
+            return self.if_statement(stmt, exits) ##LUCAS NOTE: FIND WAY TO MAKE THIS CHANGE SHAPE FIRST
         if isinstance(stmt, ast.While):
             return self.while_statement(stmt, exits)
         if isinstance(stmt, ast.For):
@@ -141,7 +154,7 @@ class GraphBuilder: #starts creation of nodes and edges
         return [] #does not have an exit since it leaves the function, so returns empty list
 
     def simple_statement(self, stmt, exits):
-        n = self.new("simple", "EDGE CASE" + ast.unparse(stmt), exits) #new node with the statement as the label, this is for unhandled statements
+        n = self.new("simple", ast.unparse(stmt), exits) #new node with the statement as the label, this is for unhandled statements
         return [(n, "")] #the node is an exit, so returns it as a list with an empty label
 
 

@@ -1,4 +1,4 @@
-##CONTROLLER TEST
+##CONTROLLER TEST, SHAPES UPDATE
 from Beta_builder_test import getnode
 from ast_test import main
 from renderer_test import Render
@@ -7,21 +7,40 @@ from renderer_test import Render
 def write_instructions(nodes, edges): #instead of builder writing to DotInstructions, controller will with the nodes and edges from getNode() from builder
     with open("DotInstructions.py", 'w', encoding="utf-8") as instructions:
         for n in nodes:
-            print(n.kind)
-            if ((n.kind == "start") or (n.kind=="end")):
+            print(n.kind) # debug feature to check that 'kind' is correctly labeling the nodes, will be commented out when final release hits
+            if ((n.kind == "start") or (n.kind=="end")): ##BEGIN SWITCH STATEMENT FOR NODE SHAPES
                 print(f"dot.node({n.id!r},shape='circle', label=graphviz.escape({n.label!r}))", file=instructions)
+
             elif (n.kind == "if"):
                 print(f"dot.node({n.id!r},shape='diamond',height='1.5', label=graphviz.escape({n.label!r}))", file=instructions)
+
+            elif (n.kind == "funcstart"):
+                print(f"dot.node({n.id!r},shape='hexagon',height = '1.5', label=graphviz.escape({n.label!r}))", file=instructions)
+
+            elif (n.kind == "funcend"):
+                print(f"dot.node({n.id!r},shape='hexagon',height = '1.5',width = '1.5',style = 'dashed', label=graphviz.escape({n.label!r}))", file=instructions)
+
+            elif (n.kind == "if"):
+                print(f"dot.node({n.id!r},shape='diamond',height='1.5', label=graphviz.escape({n.label!r}))", file=instructions)
+
             elif (n.kind == "try"):
                 print(f"dot.node({n.id!r},shape='trapezium', label=graphviz.escape({n.label!r}))", file=instructions)
+
             elif (n.kind == "return"):
                 print(f"dot.node({n.id!r},shape='cds', label=graphviz.escape({n.label!r}))", file=instructions)
-            elif (n.kind == "for"):
+
+            elif (n.kind == "except"):
+                print(f"dot.node({n.id!r},shape='cds', orientation = '90', label=graphviz.escape({n.label!r}))", file=instructions)
+
+            elif (n.kind == "for"): #kind is "for"
                 print(f"dot.node({n.id!r},shape='triangle',height='2',orientation='270', label=graphviz.escape({n.label!r}))", file=instructions)
-            elif (n.kind == "while"):
+
+            elif (n.kind == "while"): #kind is "while"
                 print(f"dot.node({n.id!r},shape='triangle',height='2',orientation='270',style='dashed', label=graphviz.escape({n.label!r}))", file=instructions)
-            else:
-                print(f"dot.node({n.id!r}, graphviz.escape({n.label!r}))", file=instructions)                
+
+            else: #simple statement
+                print(f"dot.node({n.id!r}, graphviz.escape({n.label!r}))", file=instructions)  #Default node, will be rectangle     
+
         for e in edges: #dot.node is adding the node and id, along with label, !r is used to get it via string. file is so that a print statement won't print to terminal
             if e.label:
                 print(f"dot.edge({e.source!r}, {e.target!r}, label={e.label!r},style = 'dashed')", file = instructions)
