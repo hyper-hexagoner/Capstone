@@ -62,7 +62,7 @@ class GraphBuilder: #starts creation of nodes and edges
 
     def add_node(self, kind, label): 
         node_id = f"n{len(self.nodes)}" #ids are n0, n1 etc
-        self.nodes.append(Node(node_id, kind, label.splitlines()[0])) #only one line of label, removed 40 char limit, could reimplement with [:x] current test cases go over 40 chars
+        self.nodes.append(Node(node_id, kind, label.splitlines()[0][:120])) #only one line of label, removed 40 char limit, could reimplement with [:x] current test cases go over 40 chars
         return node_id #returns node num
 
     def connect(self, source_id, target_id, label=""): #connects two nodes
