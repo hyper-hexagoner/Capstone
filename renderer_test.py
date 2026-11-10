@@ -1,6 +1,6 @@
 #Graph Renderer class, Created by Lucas Castillo
 def Render():
-    head = open("graph_header.py", 'r') #Opens pre-made header file
+    head = open("beta_graph_header.py", 'r') #Opens pre-made header file
     foot = open("graph_footer.py",'r') #Opens pre-made footer file
     dot = open("DotInstructions.py",'r') #Opens dynamically made Instructions file
     with open("FINAL_Dot_Instructions.py", "a", encoding="utf-8") as dot_final: #opens to append to the end of the file
